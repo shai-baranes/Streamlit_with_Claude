@@ -11,20 +11,22 @@ Quick libraries installation given having a predefined `requirements.txt` file:
 
 ```bash
 
-uv pip install -r requirements.txt
+#            OR 
 
----
+
 
 ## 🚀 Quick Start
 
-```bash
+
 # 1. Create & activate a virtual environment (recommended)
 python -m venv .venv
 source .venv/bin/activate        # macOS / Linux
 .venv\Scripts\activate           # Windows
 
-# 2. Install dependencies
+# 2. Install dependencies (either option from the following)
 pip install -r requirements.txt
+uv pip install -r requirements.txt 
+uv add -r requirements.txt
 
 # 3. Run the app
 streamlit run app.py
