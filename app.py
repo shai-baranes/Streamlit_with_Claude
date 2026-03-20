@@ -27,56 +27,56 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-# ─────────────────────────────────────────────
-# CUSTOM CSS
-# ─────────────────────────────────────────────
-st.markdown("""
-<style>
-    /* Main background */
-    .main { background-color: #0f1117; }
-    .stApp { background-color: #0f1117; }
+# ────────────────────────────────────────────────────────
+# CUSTOM CSS  (can be grayed-out and can will still work!)
+# ────────────────────────────────────────────────────────
+# st.markdown("""
+# <style>
+#     /* Main background */
+#     .main { background-color: #0f1117; }
+#     .stApp { background-color: #0f1117; }
 
-    /* Metric cards */
-    [data-testid="metric-container"] {
-        background: linear-gradient(135deg, #1e2130 0%, #252a3a 100%);
-        border: 1px solid #2e3450;
-        border-radius: 12px;
-        padding: 16px;
-    }
+#     /* Metric cards */
+#     [data-testid="metric-container"] {
+#         background: linear-gradient(135deg, #1e2130 0%, #252a3a 100%);
+#         border: 1px solid #2e3450;
+#         border-radius: 12px;
+#         padding: 16px;
+#     }
 
-    /* Section headers */
-    .section-header {
-        font-size: 1.4rem;
-        font-weight: 700;
-        color: #e2e8f0;
-        border-left: 4px solid #6366f1;
-        padding-left: 12px;
-        margin: 24px 0 12px 0;
-    }
+#     /* Section headers */
+#     .section-header {
+#         font-size: 1.4rem;
+#         font-weight: 700;
+#         color: #e2e8f0;
+#         border-left: 4px solid #6366f1;
+#         padding-left: 12px;
+#         margin: 24px 0 12px 0;
+#     }
 
-    .tutorial-box {
-        background: #1a1f2e;
-        border: 1px solid #2e3450;
-        border-left: 4px solid #22d3ee;
-        border-radius: 8px;
-        padding: 16px 20px;
-        margin: 12px 0;
-        font-size: 0.88rem;
-        color: #94a3b8;
-        line-height: 1.7;
-    }
+#     .tutorial-box {
+#         background: #1a1f2e;
+#         border: 1px solid #2e3450;
+#         border-left: 4px solid #22d3ee;
+#         border-radius: 8px;
+#         padding: 16px 20px;
+#         margin: 12px 0;
+#         font-size: 0.88rem;
+#         color: #94a3b8;
+#         line-height: 1.7;
+#     }
 
-    .tutorial-box code {
-        background: #0d1117;
-        color: #a5f3fc;
-        padding: 2px 6px;
-        border-radius: 4px;
-        font-family: 'Fira Code', monospace;
-    }
+#     .tutorial-box code {
+#         background: #0d1117;
+#         color: #a5f3fc;
+#         padding: 2px 6px;
+#         border-radius: 4px;
+#         font-family: 'Fira Code', monospace;
+#     }
 
-    .tutorial-box b { color: #e2e8f0; }
-</style>
-""", unsafe_allow_html=True)
+#     .tutorial-box b { color: #e2e8f0; }
+# </style>
+# """, unsafe_allow_html=True)
 
 
 # ══════════════════════════════════════════════
@@ -162,12 +162,14 @@ def generate_dataset(n: int = 1500) -> pd.DataFrame:
 
 df_full = generate_dataset()
 
+# df_full.to_csv("synthetic_sales_data.csv", index=False)  # save to CSV for download button later
+
 
 # ══════════════════════════════════════════════
 # ② SIDEBAR — INTERACTIVE FILTERS
 # ══════════════════════════════════════════════
 with st.sidebar:
-    st.image("https://streamlit.io/images/brand/streamlit-mark-color.png", width=40)
+    st.image("https://streamlit.io/images/brand/streamlit-mark-color.png", width=40) # the stupid red crown
     st.title("🎛️ Dashboard Filters")
 
     st.markdown("""
@@ -189,8 +191,9 @@ with st.sidebar:
         "📅 Year",
         options=all_years,
         default=all_years,
-        help="Hold Ctrl/Cmd to select multiple years"
+        help="'x' to filter out, 'v' to resume on de-selected items.",
     )
+    st.caption("\n")
 
     # ── Region filter ─────────────────────────
     all_regions = sorted(df_full["Region"].unique())
@@ -199,6 +202,7 @@ with st.sidebar:
         options=all_regions,
         default=all_regions,
     )
+    st.caption("\n")
 
     # ── Category filter ───────────────────────
     all_categories = sorted(df_full["Category"].unique())
@@ -207,6 +211,7 @@ with st.sidebar:
         options=all_categories,
         default=all_categories,
     )
+    st.caption("\n")
 
     # ── Segment filter ────────────────────────
     all_segments = sorted(df_full["Segment"].unique())
@@ -215,6 +220,7 @@ with st.sidebar:
         options=all_segments,
         default=all_segments,
     )
+    st.caption("\n")
 
     # ── Revenue range slider ──────────────────
     st.divider()
@@ -230,8 +236,9 @@ with st.sidebar:
 
     # ── Won deals toggle ─────────────────────
     st.divider()
-    won_only = st.toggle("🏆 Won Deals Only", value=False)
-    st.caption(f"Total raw records: {len(df_full):,}")
+    won_only = st.toggle("🏆 Won Deals Only", value=False) # toggle option button (value: Off by default)
+    st.caption(f"Total raw records: {len(df_full)}") # basic text
+    # st.caption(f"Total raw records: {len(df_full):,}") # basic text
 
 
 # ══════════════════════════════════════════════
@@ -239,7 +246,7 @@ with st.sidebar:
 # ══════════════════════════════════════════════
 
 """
-TUTORIAL NOTE ──────────────────────────────────────────────────────────────
+TUTORIAL NOTE ──────────────────────────────────────────────────────────────\n
 Pandas boolean indexing: each condition returns a boolean Series.
 Chain them with & (AND) / | (OR).  Always wrap conditions in parentheses!
 
@@ -247,6 +254,7 @@ Chain them with & (AND) / | (OR).  Always wrap conditions in parentheses!
 ─────────────────────────────────────────────────────────────────────────────
 """
 
+# here we utilize the 'st.multiselect' left pane controls.
 df = df_full[
     (df_full["Year"].isin(selected_years))
     & (df_full["Region"].isin(selected_regions))
@@ -256,7 +264,7 @@ df = df_full[
 ]
 
 if won_only:
-    df = df[df["Deal_Won"] == True]
+    df = df[df["Deal_Won"] == True]  # noqa: E712
 
 # ══════════════════════════════════════════════
 # ④ MAIN PAGE HEADER
@@ -264,14 +272,14 @@ if won_only:
 st.title("📊 Global Sales Intelligence Dashboard")
 st.caption("A hands-on Streamlit + Pandas tutorial · Data is synthetic")
 
-if df.empty:
-    st.warning("⚠️ No data matches the current filters. Please adjust the sidebar.")
+if df.empty: # check if the filtered DataFrame is empty
+    st.warning("⚠️ No data matches the current filters. Please adjust the sidebar filters.")
     st.stop()          # ← halts execution of the rest of the script
 
 # ══════════════════════════════════════════════
 # ⑤ KPI METRIC CARDS
 # ══════════════════════════════════════════════
-st.markdown("<div class='section-header'>⚡ Key Performance Indicators</div>", unsafe_allow_html=True)
+st.markdown("<div class='section-header'>⚡ Key Performance Indicators</div><br>", unsafe_allow_html=True) # <br> is for new line (like '\n'); <b>txt</b> is for "txt" in bold
 
 st.markdown("""
 <div class='tutorial-box'>
@@ -287,18 +295,19 @@ col1, col2, col3, col4, col5 = st.columns(5)
 total_rev    = df["Revenue"].sum()
 total_profit = df["Profit"].sum()
 avg_margin   = df["Margin_%"].mean()
-total_deals  = len(df)
+total_deals  = len(df) # number of deals
 win_rate     = df["Deal_Won"].mean() * 100
 
 # Compare against full dataset for delta
 full_rev = df_full["Revenue"].sum()
 
-col1.metric("Total Revenue",  f"${total_rev/1e6:.2f}M",  f"{((total_rev/full_rev)-1)*100:.1f}% of total")
-col2.metric("Total Profit",   f"${total_profit/1e6:.2f}M")
-col3.metric("Avg Margin",     f"{avg_margin:.1f}%")
-col4.metric("Deals",          f"{total_deals:,}")
-col5.metric("Win Rate",       f"{win_rate:.1f}%")
-
+col1.metric(label="Total Revenue",  value=f"${total_rev/1e6:.2f}M",  delta=f"{((total_rev/full_rev)-1)*100:.1f}% of total", border=True)
+# st.caption(f"total_rev = {total_rev}") # just for debug (by looking at the screen)
+# st.caption(f"full_rev = {full_rev}")
+col2.metric(label="Total Profit",   value=f"${total_profit/1e6:.2f}M", border=True)
+col3.metric(label="Avg Margin",     value=f"{avg_margin:.1f}%", border=True)
+col4.metric(label="Deals",          value=f"{total_deals:,}", border=True)
+col5.metric(label="Win Rate",       value=f"{win_rate:.1f}%", border=True)
 
 # ══════════════════════════════════════════════
 # ⑥ DYNAMIC CHARTS  (user-controlled via dropdowns)
@@ -317,37 +326,39 @@ Plotly figures are rendered with <code>st.plotly_chart(fig, use_container_width=
 """, unsafe_allow_html=True)
 
 # ── Row 1: Bar + Line ─────────────────────────
-c1, c2 = st.columns(2)
+c1, c2 = st.columns(2) # 'c' for column (per our new raw)
 
 with c1:
     st.subheader("Bar Chart — Revenue Breakdown")
-    bar_group = st.selectbox(
+    bar_group = st.selectbox( # drop down single selected option affecting the x-axis tics
         "Group by",
         ["Category", "Region", "Segment", "Channel", "Year", "Quarter"],
         key="bar_group",
     )
-    bar_metric = st.radio(
+    bar_metric = st.radio( # radio options affecting the y-axis values (the height of the bars)
         "Metric",
         ["Revenue", "Profit", "Units"],
         horizontal=True,
         key="bar_metric",
     )
     bar_df = (
-        df.groupby(bar_group)[bar_metric]
+        df.groupby(bar_group)[bar_metric] # 'bar_metric' is the column for the chart (either 'Revenue', 'Profit' or 'Units' depending on the radio selection)
         .sum()
         .reset_index()
-        .sort_values(bar_metric, ascending=False)
+        .sort_values(bar_metric, ascending=False) # for Bar chart to be sorted by heights (heighest to the left)
     )
     fig_bar = px.bar(
         bar_df,
-        x=bar_group,
-        y=bar_metric,
+        x=bar_group, # x-label is the grouping dimension (e.g. 'Category')
+        y=bar_metric, # y-label is the selected metric (e.g. 'Revenue')
         color=bar_group,
         color_discrete_sequence=px.colors.qualitative.Bold,
-        template="plotly_dark",
+        template="presentation", # what are the template options? https://plotly.com/python/templates/
+        # template="plotly_dark",
         title=f"{bar_metric} by {bar_group}",
     )
-    fig_bar.update_layout(showlegend=False, plot_bgcolor="#1e2130", paper_bgcolor="#1e2130")
+    fig_bar.update_layout(showlegend=True)
+    # fig_bar.update_layout(showlegend=False, plot_bgcolor="#1e2130", paper_bgcolor="#1e2130")
     st.plotly_chart(fig_bar, use_container_width=True)
 
 with c2:
@@ -399,9 +410,17 @@ with c2:
         color_discrete_sequence=px.colors.qualitative.Vivid,
         title=f"{line_metric} over Time by {line_color}",
     )
-    fig_line.update_layout(plot_bgcolor="#1e2130", paper_bgcolor="#1e2130",
-                           xaxis_tickangle=-35)
+    fig_line.update_layout(xaxis_tickangle=-35)
+    # fig_line.update_layout(plot_bgcolor="#1e2130", paper_bgcolor="#1e2130", xaxis_tickangle=-35)
+
     st.plotly_chart(fig_line, use_container_width=True)
+
+
+st.divider() # another and more elegant way (although gray and not bold) to add a horizontal line (visually separate sections)
+"""
+────────────────────────────────────────────────────────────── Charts 2nd Row ───────────────────────────────────────────────────────
+"""
+st.divider() # another way to add a horizontal line (visually separate sections)
 
 
 # ── Row 2: Scatter + Treemap ──────────────────

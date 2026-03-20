@@ -4,17 +4,16 @@ A professional, fully-commented Streamlit app covering the most important
 patterns for building data dashboards with pandas DataFrames.
 
 
-## My Own input
+## Self Notes
 This is a tutorial I created to teach myself how to build data dashboards with Streamlit and pandas. It covers the most important patterns for building interactive data apps, including sidebar filters, KPI cards, charts, pivot tables, and more. The dataset is synthetic global sales data across multiple dimensions.
+
+Once adding pages (TABs), the name of the main TAB is the .py file name and the other tabs according to the file names under the 'page' folder.
+(order is given by the enumerate prefix in the file name, e.g. 1_ for the first tab, 2_ for the second tab, etc.)
+
 
 Quick libraries installation given having a predefined `requirements.txt` file:
 
 ```bash
-
-#            OR 
-
-
-
 ## 🚀 Quick Start
 
 
@@ -24,9 +23,9 @@ source .venv/bin/activate        # macOS / Linux
 .venv\Scripts\activate           # Windows
 
 # 2. Install dependencies (either option from the following)
-pip install -r requirements.txt
-uv pip install -r requirements.txt 
-uv add -r requirements.txt
+# pip install -r requirements.txt
+# uv pip install -r requirements.txt 
+uv add -r requirements.txt # my prefered way
 
 # 3. Run the app
 streamlit run app.py
