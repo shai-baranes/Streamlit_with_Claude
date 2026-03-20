@@ -1,0 +1,12 @@
+[project]
+name = "streamlit-with-claude"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "numpy>=1.26.0",
+    "pandas>=2.0.0",
+    "plotly>=5.20.0",
+    "streamlit>=1.32.0",
+]
