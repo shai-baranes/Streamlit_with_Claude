@@ -13,11 +13,10 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import plotly.express as px
-# import plotly.graph_objects as go
+import plotly.graph_objects as go
 from datetime import datetime, timedelta
 import random
-import matplotlib # pandas' background_gradient() uses it internally for its color map engine, but doesn't auto-install it  # noqa: F401
-# import matplotlib.pyplot as plt
+import matplotlib  # required by pandas Styler.background_gradient()  # noqa: F401
 
 # ─────────────────────────────────────────────
 # PAGE CONFIG  (must be the FIRST st.* call)
@@ -29,63 +28,63 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-# ────────────────────────────────────────────────────────
-# CUSTOM CSS  (can be grayed-out and can will still work!)
-# ────────────────────────────────────────────────────────
-# st.markdown("""
-# <style>
-#     /* Main background */
-#     .main { background-color: #0f1117; }
-#     .stApp { background-color: #0f1117; }
+# ─────────────────────────────────────────────
+# CUSTOM CSS
+# ─────────────────────────────────────────────
+st.markdown("""
+<style>
+    /* Main background */
+    .main { background-color: #0f1117; }
+    .stApp { background-color: #0f1117; }
 
-#     /* Metric cards */
-#     [data-testid="metric-container"] {
-#         background: linear-gradient(135deg, #1e2130 0%, #252a3a 100%);
-#         border: 1px solid #2e3450;
-#         border-radius: 12px;
-#         padding: 16px;
-#     }
+    /* Metric cards */
+    [data-testid="metric-container"] {
+        background: linear-gradient(135deg, #1e2130 0%, #252a3a 100%);
+        border: 1px solid #2e3450;
+        border-radius: 12px;
+        padding: 16px;
+    }
 
-#     /* Section headers */
-#     .section-header {
-#         font-size: 1.4rem;
-#         font-weight: 700;
-#         color: #e2e8f0;
-#         border-left: 4px solid #6366f1;
-#         padding-left: 12px;
-#         margin: 24px 0 12px 0;
-#     }
+    /* Section headers */
+    .section-header {
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: #e2e8f0;
+        border-left: 4px solid #6366f1;
+        padding-left: 12px;
+        margin: 24px 0 12px 0;
+    }
 
-#     .tutorial-box {
-#         background: #1a1f2e;
-#         border: 1px solid #2e3450;
-#         border-left: 4px solid #22d3ee;
-#         border-radius: 8px;
-#         padding: 16px 20px;
-#         margin: 12px 0;
-#         font-size: 0.88rem;
-#         color: #94a3b8;
-#         line-height: 1.7;
-#     }
+    .tutorial-box {
+        background: #1a1f2e;
+        border: 1px solid #2e3450;
+        border-left: 4px solid #22d3ee;
+        border-radius: 8px;
+        padding: 16px 20px;
+        margin: 12px 0;
+        font-size: 0.88rem;
+        color: #94a3b8;
+        line-height: 1.7;
+    }
 
-#     .tutorial-box code {
-#         background: #0d1117;
-#         color: #a5f3fc;
-#         padding: 2px 6px;
-#         border-radius: 4px;
-#         font-family: 'Fira Code', monospace;
-#     }
+    .tutorial-box code {
+        background: #0d1117;
+        color: #a5f3fc;
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-family: 'Fira Code', monospace;
+    }
 
-#     .tutorial-box b { color: #e2e8f0; }
-# </style>
-# """, unsafe_allow_html=True)
+    .tutorial-box b { color: #e2e8f0; }
+</style>
+""", unsafe_allow_html=True)
 
 
 # ══════════════════════════════════════════════
 # ① DATASET GENERATION
 # ══════════════════════════════════════════════
 
-@st.cache_data          # ← cache so the data doesn't regenerate on every interaction (it is a actually decorator that caches the output of the 'generate_dataset' function. This means that if the function is called again with the same arguments, it will return the cached result instead of executing the function again. This is useful for expensive operations like data generation or loading, as it improves performance by avoiding unnecessary recomputation.)
+@st.cache_data          # ← cache so the data doesn't regenerate on every interaction
 def generate_dataset(n: int = 1500) -> pd.DataFrame:
     """
     TUTORIAL NOTE ──────────────────────────────────────────────────────────────
@@ -164,103 +163,76 @@ def generate_dataset(n: int = 1500) -> pd.DataFrame:
 
 df_full = generate_dataset()
 
-# df_full.to_csv("synthetic_sales_data.csv", index=False)  # save to CSV for download button later
-
 
 # ══════════════════════════════════════════════
 # ② SIDEBAR — INTERACTIVE FILTERS
 # ══════════════════════════════════════════════
 with st.sidebar:
-    st.image("https://streamlit.io/images/brand/streamlit-mark-color.png", width=40) # the stupid red crown
+    st.image("https://streamlit.io/images/brand/streamlit-mark-color.png", width=40)
     st.title("🎛️ Dashboard Filters")
 
-    # st.markdown("""
-    # <div class='tutorial-box'>
-    # <b>📘 Tutorial: Sidebar Widgets</b><br>
-    # <code>st.sidebar</code> is a context manager. Anything inside it renders
-    # in the collapsible left panel.<br><br>
-    # Widgets like <code>st.multiselect</code>, <code>st.slider</code>, and
-    # <code>st.date_input</code> return Python values you can use directly
-    # to filter your DataFrame.
-    # </div>
-    # """, unsafe_allow_html=True)
-
-    # css to customize the appearance of the multi-select tags (the selected options in the dropdowns) in the sidebar
     st.markdown("""
-    <style>
-    /* Style all tags (text and background) */
-    span[data-baseweb="tag"] {
-        background-color: #d1e7dd !important;
-        color: #0f5132 !important;
-    }
-
-    /* Optional: Target specific options based on their text */
-    span[data-baseweb="tag"]:has(span[title="Red"]) {
-        background-color: #f8d7da !important;
-        color: #842029 !important;
-    }
-    </style>
-    """, unsafe_allow_html=True) # 
-
-
+    <div class='tutorial-box'>
+    <b>📘 Tutorial: Sidebar Widgets</b><br>
+    <code>st.sidebar</code> is a context manager. Anything inside it renders
+    in the collapsible left panel.<br><br>
+    Widgets like <code>st.multiselect</code>, <code>st.slider</code>, and
+    <code>st.date_input</code> return Python values you can use directly
+    to filter your DataFrame.
+    </div>
+    """, unsafe_allow_html=True)
 
     st.divider()
 
     # ── Year filter ──────────────────────────
     all_years = sorted(df_full["Year"].unique())
     selected_years = st.multiselect(
-        label="📅 Year",
+        "📅 Year",
         options=all_years,
         default=all_years,
-        help="'x' to filter out, 'v' to resume on de-selected items.",
-        format_func=lambda x: f"Year {x}", # how the options are displayed in the dropdown (e.g. "Year 2022" instead of just "2022")
+        help="Hold Ctrl/Cmd to select multiple years"
     )
-    st.caption("\n")
 
     # ── Region filter ─────────────────────────
     all_regions = sorted(df_full["Region"].unique())
     selected_regions = st.multiselect(
-        label="🌍 Region",
+        "🌍 Region",
         options=all_regions,
         default=all_regions,
     )
-    st.caption("\n")
 
     # ── Category filter ───────────────────────
     all_categories = sorted(df_full["Category"].unique())
     selected_categories = st.multiselect(
-        label="🏷️ Category",
+        "🏷️ Category",
         options=all_categories,
         default=all_categories,
     )
-    st.caption("\n")
 
     # ── Segment filter ────────────────────────
     all_segments = sorted(df_full["Segment"].unique())
     selected_segments = st.multiselect(
-        label="🎯 Segment",
+        "🎯 Segment",
         options=all_segments,
         default=all_segments,
     )
-    st.caption("\n")
 
     # ── Revenue range slider ──────────────────
     st.divider()
     rev_min = float(df_full["Revenue"].min())
     rev_max = float(df_full["Revenue"].max())
     revenue_range = st.slider(
-        label="💰 Revenue Range ($)",
+        "💰 Revenue Range ($)",
         min_value=rev_min,
         max_value=rev_max,
         value=(rev_min, rev_max),
-        format="$%.0f", # adding the $ sign to the left of the min/max displayed values
+        format="$%.0f",
     )
 
     # ── Won deals toggle ─────────────────────
     st.divider()
-    won_only = st.toggle("🏆 Won Deals Only", value=False) # toggle option button (value: Off by default)
-    st.caption(f"Total raw records: {len(df_full)}") # basic text
-    # st.caption(f"Total raw records: {len(df_full):,}") # basic text
+    won_only = st.toggle("🏆 Won Deals Only", value=False)
+    st.caption(f"Total raw records: {len(df_full):,}")
 
 
 # ══════════════════════════════════════════════
@@ -268,7 +240,7 @@ with st.sidebar:
 # ══════════════════════════════════════════════
 
 """
-TUTORIAL NOTE ──────────────────────────────────────────────────────────────\n
+TUTORIAL NOTE ──────────────────────────────────────────────────────────────
 Pandas boolean indexing: each condition returns a boolean Series.
 Chain them with & (AND) / | (OR).  Always wrap conditions in parentheses!
 
@@ -276,17 +248,16 @@ Chain them with & (AND) / | (OR).  Always wrap conditions in parentheses!
 ─────────────────────────────────────────────────────────────────────────────
 """
 
-# here we utilize the 'st.multiselect' left pane controls.
 df = df_full[
     (df_full["Year"].isin(selected_years))
     & (df_full["Region"].isin(selected_regions))
     & (df_full["Category"].isin(selected_categories))
     & (df_full["Segment"].isin(selected_segments))
-    & (df_full["Revenue"].between(*revenue_range)) # within the min-max range as selected by the slider
+    & (df_full["Revenue"].between(*revenue_range))
 ]
 
 if won_only:
-    df = df[df["Deal_Won"] == True]  # noqa: E712
+    df = df[df["Deal_Won"] == True]
 
 # ══════════════════════════════════════════════
 # ④ MAIN PAGE HEADER
@@ -294,14 +265,14 @@ if won_only:
 st.title("📊 Global Sales Intelligence Dashboard")
 st.caption("A hands-on Streamlit + Pandas tutorial · Data is synthetic")
 
-if df.empty: # check if the filtered DataFrame is empty
-    st.warning("⚠️ No data matches the current filters. Please adjust the sidebar filters.")
+if df.empty:
+    st.warning("⚠️ No data matches the current filters. Please adjust the sidebar.")
     st.stop()          # ← halts execution of the rest of the script
 
 # ══════════════════════════════════════════════
 # ⑤ KPI METRIC CARDS
 # ══════════════════════════════════════════════
-st.markdown("<div class='section-header'>⚡ Key Performance Indicators</div><br>", unsafe_allow_html=True) # <br> is for new line (like '\n'); <b>txt</b> is for "txt" in bold
+st.markdown("<div class='section-header'>⚡ Key Performance Indicators</div>", unsafe_allow_html=True)
 
 st.markdown("""
 <div class='tutorial-box'>
@@ -317,19 +288,18 @@ col1, col2, col3, col4, col5 = st.columns(5)
 total_rev    = df["Revenue"].sum()
 total_profit = df["Profit"].sum()
 avg_margin   = df["Margin_%"].mean()
-total_deals  = len(df) # number of deals
+total_deals  = len(df)
 win_rate     = df["Deal_Won"].mean() * 100
 
 # Compare against full dataset for delta
 full_rev = df_full["Revenue"].sum()
 
-col1.metric(label="Total Revenue",  value=f"${total_rev/1e6:.2f}M",  delta=f"{((total_rev/full_rev)-1)*100:.1f}% of total", border=True)
-# st.caption(f"total_rev = {total_rev}") # just for debug (by looking at the screen)
-# st.caption(f"full_rev = {full_rev}")
-col2.metric(label="Total Profit",   value=f"${total_profit/1e6:.2f}M", border=True)
-col3.metric(label="Avg Margin",     value=f"{avg_margin:.1f}%", border=True)
-col4.metric(label="Deals",          value=f"{total_deals:,}", border=True)
-col5.metric(label="Win Rate",       value=f"{win_rate:.1f}%", border=True)
+col1.metric("Total Revenue",  f"${total_rev/1e6:.2f}M",  f"{((total_rev/full_rev)-1)*100:.1f}% of total")
+col2.metric("Total Profit",   f"${total_profit/1e6:.2f}M")
+col3.metric("Avg Margin",     f"{avg_margin:.1f}%")
+col4.metric("Deals",          f"{total_deals:,}")
+col5.metric("Win Rate",       f"{win_rate:.1f}%")
+
 
 # ══════════════════════════════════════════════
 # ⑥ DYNAMIC CHARTS  (user-controlled via dropdowns)
@@ -347,49 +317,39 @@ Plotly figures are rendered with <code>st.plotly_chart(fig, use_container_width=
 </div>
 """, unsafe_allow_html=True)
 
-
-st.divider() # elegant way (although gray and not bold) to add a horizontal line (visually separate sections)
-# st.write("---") # same as this
-
-
 # ── Row 1: Bar + Line ─────────────────────────
-c1, c2 = st.columns(2) # 'c' for column (per our new raw)
+c1, c2 = st.columns(2)
 
 with c1:
     st.subheader("Bar Chart — Revenue Breakdown")
-    bar_group = st.selectbox( # drop down single selected option affecting the x-axis tics
+    bar_group = st.selectbox(
         "Group by",
-        ["Category", "Region", "Segment", "Channel", "Year", "Quarter", "Country"], # I added 'Country' and the framework was agile to accpet it!
+        ["Category", "Region", "Segment", "Channel", "Year", "Quarter"],
         key="bar_group",
     )
-    bar_metric = st.radio( # radio options affecting the y-axis values (the height of the bars)
+    bar_metric = st.radio(
         "Metric",
         ["Revenue", "Profit", "Units"],
         horizontal=True,
         key="bar_metric",
     )
     bar_df = (
-        df.groupby(bar_group)[bar_metric] # 'bar_metric' is the column for the chart (either 'Revenue', 'Profit' or 'Units' depending on the radio selection)
+        df.groupby(bar_group)[bar_metric]
         .sum()
         .reset_index()
-        .sort_values(bar_metric, ascending=False) # for Bar chart to be sorted by heights (heighest to the left)
+        .sort_values(bar_metric, ascending=False)
     )
-    # we use: plotly.express
     fig_bar = px.bar(
-        bar_df, # the DataFrame source for this chart
-        x=bar_group, # x-label is the grouping dimension (e.g. 'Category')
-        y=bar_metric, # y-label is the selected metric (e.g. 'Revenue')
+        bar_df,
+        x=bar_group,
+        y=bar_metric,
         color=bar_group,
         color_discrete_sequence=px.colors.qualitative.Bold,
-        template="presentation", # what are the template options? https://plotly.com/python/templates/
-        # template="plotly_dark",
+        template="plotly_dark",
         title=f"{bar_metric} by {bar_group}",
     )
-    fig_bar.update_layout(showlegend=True, plot_bgcolor="#E9EDF0")
-    # fig_bar.update_layout(showlegend=False, plot_bgcolor="#1e2130", paper_bgcolor="#1e2130")
+    fig_bar.update_layout(showlegend=False, plot_bgcolor="#1e2130", paper_bgcolor="#1e2130")
     st.plotly_chart(fig_bar, use_container_width=True)
-
-
 
 with c2:
     st.subheader("Time-Series Line Chart")
@@ -398,7 +358,6 @@ with c2:
         ["Revenue", "Profit", "Units", "Margin_%"],
         key="line_metric",
     )
-    # 'line_color' is also the selected classification (w/ changing options list) on which we apply the differentiating color per option on the lines
     line_color = st.selectbox(
         "Color dimension",
         ["Category", "Region", "Segment", "Channel"],
@@ -411,13 +370,12 @@ with c2:
         key="line_freq",
     )
 
-    # freq_col = "Quarter" if line_freq == "Quarterly" else "Month" # I C no use of it
+    freq_col = "Quarter" if line_freq == "Quarterly" else "Month"
 
     if line_freq == "Monthly":
         # Build a proper sort key: Year-MonthNum
         line_df = (
-            df.groupby(["Year", "MonthNum", line_color])[line_metric]
-            # df.groupby(["Year", "MonthNum", "Month", line_color])[line_metric]
+            df.groupby(["Year", "MonthNum", "Month", line_color])[line_metric]
             .sum()
             .reset_index()
         )
@@ -433,7 +391,7 @@ with c2:
         line_df = line_df.sort_values(["Year", "Quarter"])
 
     fig_line = px.line(
-        line_df, # the DataFrame source for this chart
+        line_df,
         x="Period",
         y=line_metric,
         color=line_color,
@@ -442,19 +400,9 @@ with c2:
         color_discrete_sequence=px.colors.qualitative.Vivid,
         title=f"{line_metric} over Time by {line_color}",
     )
-    fig_line.update_layout(plot_bgcolor="#E9EDF0", xaxis_tickangle=-35) # tbd find some gray color for background: https://www.color-hex.com/color-palette/
-    fig_line.update_layout(xaxis=dict(showgrid=True, gridcolor="#cbd5e1"), yaxis=dict(showgrid=True, gridcolor="#cbd5e1"))
-
-    # fig_line.update_layout(plot_bgcolor="#1e2130", paper_bgcolor="#1e2130", xaxis_tickangle=-35)
-
+    fig_line.update_layout(plot_bgcolor="#1e2130", paper_bgcolor="#1e2130",
+                           xaxis_tickangle=-35)
     st.plotly_chart(fig_line, use_container_width=True)
-
-
-st.divider() # another and more elegant way (although gray and not bold) to add a horizontal line (visually separate sections)
-"""
-────────────────────────────────────────────────────────────── Charts 2nd Row ───────────────────────────────────────────────────────
-"""
-st.divider() # another way to add a horizontal line (visually separate sections)
 
 
 # ── Row 2: Scatter + Treemap ──────────────────
@@ -486,10 +434,7 @@ with c3:
         title=f"Revenue vs Profit  (colored by {scatter_color})",
         opacity=0.75,
     )
-    fig_scatter.update_layout(plot_bgcolor="#E9EDF0", paper_bgcolor="#E9EDF0")
-    fig_scatter.update_layout(xaxis=dict(showgrid=True, gridcolor="#cbd5e1"), yaxis=dict(showgrid=True, gridcolor="#cbd5e1"))
-    # fig_scatter.update_layout(xaxis=dict(showgrid=True, gridcolor="#1e2130"), yaxis=dict(showgrid=True, gridcolor="#1e2130")) # for black grid
-    # fig_scatter.update_layout(plot_bgcolor="#1e2130", paper_bgcolor="#1e2130")
+    fig_scatter.update_layout(plot_bgcolor="#1e2130", paper_bgcolor="#1e2130")
     st.plotly_chart(fig_scatter, use_container_width=True)
 
 with c4:
@@ -533,10 +478,122 @@ fig_box.update_layout(plot_bgcolor="#1e2130", paper_bgcolor="#1e2130", showlegen
 st.plotly_chart(fig_box, use_container_width=True)
 
 
-st.divider() # another and more elegant way (although gray and not bold) to add a horizontal line (visually separate sections)
-"""
-────────────────────────────────────────────────────────────── Pivot Tables ───────────────────────────────────────────────────────
-"""
+# ── Row 4: Profit over Time line plot ─────────
+st.subheader("📉 Aggregated Profit over Time")
+
+st.markdown("""
+<div class='tutorial-box'>
+<b>📘 Tutorial: Time-axis aggregation with cumulative option</b><br>
+We use <code>df.resample()</code> (after <code>.set_index("Date")</code>) or
+<code>df.groupby(pd.Grouper(key="Date", freq=...))</code> to bucket rows into
+regular time intervals — daily, weekly, monthly, or quarterly.<br><br>
+• <code>pd.Grouper(freq="ME")</code>  — month-end buckets<br>
+• <code>pd.Grouper(freq="QE")</code>  — quarter-end buckets<br>
+• <code>.cumsum()</code>              — running total over the sorted series<br>
+• <code>go.Figure + add_trace()</code> — overlay bars + line on one Plotly figure
+</div>
+""", unsafe_allow_html=True)
+
+profit_col1, profit_col2, profit_col3 = st.columns(3)
+
+with profit_col1:
+    profit_freq = st.radio(
+        "Time granularity",
+        ["Daily", "Weekly", "Monthly", "Quarterly"],
+        index=2,
+        horizontal=True,
+        key="profit_freq",
+    )
+
+with profit_col2:
+    profit_breakdown = st.selectbox(
+        "Color breakdown (optional)",
+        ["None", "Category", "Region", "Segment", "Channel"],
+        key="profit_breakdown",
+    )
+
+with profit_col3:
+    show_cumulative = st.toggle("Show cumulative profit", value=False, key="profit_cumul")
+
+# Map UI label -> pandas freq alias
+freq_map = {"Daily": "D", "Weekly": "W", "Monthly": "ME", "Quarterly": "QE"}
+freq_alias = freq_map[profit_freq]
+
+if profit_breakdown == "None":
+    # Simple aggregation: resample by chosen frequency
+    profit_ts = (
+        df.set_index("Date")
+        .resample(freq_alias)["Profit"]
+        .sum()
+        .reset_index()
+    )
+    profit_ts.columns = ["Date", "Profit"]
+
+    if show_cumulative:
+        profit_ts["CumulativeProfit"] = profit_ts["Profit"].cumsum()
+        y_col, y_label = "CumulativeProfit", "Cumulative Profit ($)"
+    else:
+        y_col, y_label = "Profit", "Profit ($)"
+
+    # Overlay: semi-transparent bars for period profit + line for trend/cumulative
+    fig_profit = go.Figure()
+    fig_profit.add_trace(go.Bar(
+        x=profit_ts["Date"],
+        y=profit_ts["Profit"],
+        name="Period Profit",
+        marker_color="#6366f1",
+        opacity=0.50,
+    ))
+    fig_profit.add_trace(go.Scatter(
+        x=profit_ts["Date"],
+        y=profit_ts[y_col],
+        name=y_label,
+        mode="lines+markers",
+        line=dict(color="#22d3ee", width=2.5),
+        marker=dict(size=5),
+    ))
+    fig_profit.update_layout(
+        title=f"{'Cumulative' if show_cumulative else 'Aggregated'} Profit — {profit_freq}",
+        xaxis_title="Date",
+        yaxis_title="Profit ($)",
+        template="plotly_dark",
+        plot_bgcolor="#1e2130",
+        paper_bgcolor="#1e2130",
+        legend=dict(orientation="h", y=1.08),
+        hovermode="x unified",
+        barmode="overlay",
+    )
+
+else:
+    # Breakdown by chosen dimension using pd.Grouper
+    profit_ts = (
+        df.groupby([pd.Grouper(key="Date", freq=freq_alias), profit_breakdown])["Profit"]
+        .sum()
+        .reset_index()
+    )
+    if show_cumulative:
+        profit_ts = profit_ts.sort_values("Date")
+        profit_ts["Profit"] = profit_ts.groupby(profit_breakdown)["Profit"].cumsum()
+
+    fig_profit = px.line(
+        profit_ts,
+        x="Date",
+        y="Profit",
+        color=profit_breakdown,
+        markers=True,
+        template="plotly_dark",
+        color_discrete_sequence=px.colors.qualitative.Bold,
+        title=f"{'Cumulative' if show_cumulative else 'Aggregated'} Profit by {profit_breakdown} — {profit_freq}",
+    )
+    fig_profit.update_layout(
+        plot_bgcolor="#1e2130",
+        paper_bgcolor="#1e2130",
+        hovermode="x unified",
+        legend=dict(orientation="h", y=1.08),
+    )
+    fig_profit.update_traces(line_width=2, marker_size=4)
+
+st.plotly_chart(fig_profit, use_container_width=True)
 
 
 # ══════════════════════════════════════════════
@@ -563,8 +620,7 @@ pv_col1, pv_col2, pv_col3, pv_col4 = st.columns(4)
 with pv_col1:
     pivot_rows = st.selectbox("Pivot Rows",    ["Region", "Category", "Segment", "Channel", "Year", "Quarter"], index=0)
 with pv_col2:
-    pivot_cols = st.selectbox("Pivot Columns", ["Region", "Category", "Segment", "Channel", "Year", "Quarter"], index=1)
-    # pivot_cols = st.selectbox("Pivot Columns", ["Category", "Region", "Segment", "Channel", "Year", "Quarter"], index=1)
+    pivot_cols = st.selectbox("Pivot Columns", ["Category", "Region", "Segment", "Channel", "Year", "Quarter"], index=1)
 with pv_col3:
     pivot_val  = st.selectbox("Values",        ["Revenue", "Profit", "Units", "Margin_%"], index=0)
 with pv_col4:
@@ -587,27 +643,25 @@ else:
         fill_value=0,
     )
 
-    # # Round for display (is there any meaning for this?)
-    # if pivot_val in ["Revenue", "Profit"]:
-    #     pivot_display = pivot_table.applymap(lambda x: f"${x:,.0f}")
-    # elif pivot_val == "Margin_%":
-    #     pivot_display = pivot_table.applymap(lambda x: f"{x:.1f}%")
-    # else:
-    #     pivot_display = pivot_table.applymap(lambda x: f"{int(x)}")
-    #     # pivot_display = pivot_table.applymap(lambda x: f"{int(x):,}")
+    # Round for display
+    if pivot_val in ["Revenue", "Profit"]:
+        pivot_display = pivot_table.applymap(lambda x: f"${x:,.0f}")
+    elif pivot_val == "Margin_%":
+        pivot_display = pivot_table.applymap(lambda x: f"{x:.1f}%")
+    else:
+        pivot_display = pivot_table.applymap(lambda x: f"{int(x):,}")
 
     # Styled numeric version for gradient (drop TOTAL row/col for the gradient)
-    pivot_numeric = pivot_table.iloc[:-1, :-1]  # exclude margins (without the "TOTAL" that appears at the end)
+    pivot_numeric = pivot_table.iloc[:-1, :-1]  # exclude margins
     styled = (
         pivot_numeric
         .style
-        .background_gradient(cmap="YlOrRd", axis=None) # gradient on the values (e.g. from light yellow to dark red when value is up)
+        .background_gradient(cmap="YlOrRd", axis=None)
         .format(lambda x: f"${x:,.0f}" if pivot_val in ["Revenue","Profit"]
                           else (f"{x:.1f}%" if pivot_val == "Margin_%" else f"{int(x):,}"))
     )
 
-    st.dataframe(styled, use_container_width=True, height=350)# disaplying the styled datafram
-    # st.dataframe(pivot_numeric, use_container_width=True, height=350) # disaplying the basic datafram
+    st.dataframe(styled, use_container_width=True, height=350)
     st.caption(f"Pivot: {pivot_agg}({pivot_val}) — {pivot_rows} × {pivot_cols} — {len(pivot_table)-1} row groups")
 
 
@@ -659,7 +713,7 @@ display_cols = st.multiselect(
              "Segment", "Revenue", "Profit", "Margin_%", "Deal_Won"],
 )
 
-n_rows = st.slider("Rows to preview", 10, 200, 50, step=10) # 10 to 200 rows, default 50, step of 10 (i.e. 10,20,30,...200)
+n_rows = st.slider("Rows to preview", 10, 200, 50, step=10)
 
 if display_cols:
     st.dataframe(

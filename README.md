@@ -29,6 +29,8 @@ uv add -r requirements.txt # my prefered way
 
 # 3. Run the app
 streamlit run app.py
+# another option (without having to activate the environment)
+uv run streamlit run app.py
 ```
 
 Your browser will open automatically at **http://localhost:8501**
